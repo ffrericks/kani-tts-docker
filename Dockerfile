@@ -1,5 +1,5 @@
-# Use NVIDIA CUDA base for GPU support, fallback to CPU works automatically
-FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+# Use NVIDIA CUDA DEVEL image for extra build tools and headers
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9,9 +9,6 @@ RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
     python3-dev \
-    build-essential \
-    cmake \
-    g++ \
     ffmpeg \
     libsndfile1 \
     git \
@@ -20,14 +17,20 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
+# Upgrade pip
+RUN pip3 install --no-cache-dir --upgrade pip
+
+# Install heavy dependencies separately to avoid resolution conflicts
+# Torch first, as many other packages depend on it
+RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# Install build dependencies
+RUN pip3 install --no-cache-dir Cython numba setuptools
+
 # Clone the repository
 RUN git clone https://github.com/nineninesix-ai/kani-tts.git .
 
-# Upgrade pip and install build dependencies
-RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 install --no-cache-dir Cython
-
-# Install Python dependencies
+# Install remaining Python dependencies
 RUN pip3 install --no-cache-dir \
     fastapi \
     uvicorn \
@@ -43,10 +46,7 @@ EXPOSE 8000
 ENV HF_HOME=/root/.cache/huggingface
 
 # Command to run the server
-# We run from the examples/basic directory to ensure local modules are found
 WORKDIR /app/examples/basic
-
-# Copy our custom files
 COPY server.py .
 COPY config.py .
 COPY index.html .
