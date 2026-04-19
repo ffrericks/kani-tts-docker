@@ -18,8 +18,14 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Install kani-tts - torch is already pre-installed in this base image
-# --no-deps-override prevents pip from reinstalling torch
 RUN pip install --no-cache-dir kani-tts
+
+# nemo-toolkit installs an incompatible torchvision - force the correct version
+# torchvision 0.22.0 is compatible with torch 2.7.0 + CUDA 12.6
+RUN pip install --no-cache-dir --force-reinstall \
+    "torchvision==0.22.0" \
+    "torchaudio==2.7.0" \
+    --index-url https://download.pytorch.org/whl/cu126
 
 # Install server dependencies
 RUN pip install --no-cache-dir fastapi uvicorn scipy
