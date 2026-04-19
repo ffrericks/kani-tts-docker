@@ -204,6 +204,39 @@
                 <textarea id="text" placeholder="Type your text here... Kani TTS will transform it into natural speech."></textarea>
             </div>
 
+            <div class="input-group">
+                <label for="voice">Accent / Voice</label>
+                <select id="voice" style="width: 100%; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--glass); border-radius: 0.75rem; padding: 1rem; color: var(--text); font-family: inherit; font-size: 1rem; outline: none;">
+                    <optgroup label="English">
+                        <option value="jenny">Jenny (English)</option>
+                        <option value="david">David (English)</option>
+                        <option value="puck">Puck (English)</option>
+                        <option value="kore">Kore (English)</option>
+                        <option value="andrew">Andrew (English)</option>
+                        <option value="simon">Simon (English)</option>
+                        <option value="katie">Katie (English)</option>
+                        <option value="bert">Bert (English)</option>
+                    </optgroup>
+                    <optgroup label="Deutsch">
+                        <option value="thorsten">Thorsten (German)</option>
+                    </optgroup>
+                    <optgroup label="Español">
+                        <option value="maria">Maria (Spanish)</option>
+                    </optgroup>
+                    <optgroup label="中文">
+                        <option value="mei">Mei (Chinese)</option>
+                        <option value="ming">Ming (Chinese)</option>
+                    </optgroup>
+                    <optgroup label="한국어">
+                        <option value="seulgi">Seulgi (Korean)</option>
+                    </optgroup>
+                    <optgroup label="العربية">
+                        <option value="karim">Karim (Arabic)</option>
+                        <option value="nur">Nur (Arabic)</option>
+                    </optgroup>
+                </select>
+            </div>
+
             <div class="controls">
                 <div class="control-item">
                     <label>Temperature: <span id="temp-val">0.6</span></label>
@@ -258,6 +291,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         text: text,
+                        voice: document.getElementById('voice').value,
                         temperature: parseFloat(document.getElementById('temperature').value),
                         top_p: parseFloat(document.getElementById('top_p').value)
                     })

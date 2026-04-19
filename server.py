@@ -40,6 +40,7 @@ class TTSRequest(BaseModel):
     top_p: Optional[float] = TOP_P
     chunk_size: Optional[int] = CHUNK_SIZE
     lookback_frames: Optional[int] = LOOKBACK_FRAMES
+    voice: Optional[str] = None
 
 @app.on_event("startup")
 async def startup_event():
@@ -76,8 +77,14 @@ async def generate_speech(request: TTSRequest):
         )
         audio_writer.start()
 
-        generator.generate(
-            request.text,
+        # Format prompt with speaker name if provided
+        prompt = request.text
+        if request.voice:
+            prompt = f"{request.voice.strip()}: {prompt}"
+
+        # Generate speech
+        result = generator.generate(
+            prompt,
             audio_writer,
             max_tokens=request.max_tokens
         )
@@ -127,10 +134,17 @@ async def stream_speech(request: TTSRequest):
         )
         audio_writer.audio_chunks = ChunkList()
 
+        # Format prompt with speaker name if provided
+        prompt = request.text
+        if request.voice:
+            prompt = f"{request.voice.strip()}: {prompt}"
+
+        # Start generation in background thread
         def generate():
             try:
                 audio_writer.start()
-                generator.generate(request.text, audio_writer, max_tokens=request.max_tokens)
+                generator.generate(
+                    prompt, audio_writer, max_tokens=request.max_tokens)
                 audio_writer.finalize()
                 chunk_queue.put(("done", None))
             except Exception as e:
