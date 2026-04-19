@@ -20,7 +20,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - / hf_cache:/root/.cache/huggingface
+      - hf_cache:/root/.cache/huggingface
     deploy:
       resources:
         reservations:
@@ -35,8 +35,9 @@ volumes:
   hf_cache:
 ```
 
-3.  Click **Install**
-4.  Access the Web UI at `http://<your-server-ip>:8000`
+3.  Under **"Web UI"**, set the port to **`8000`** and the path to **`/`**
+4.  Click **Install**
+5.  Access the Web UI at `http://<your-server-ip>:8000`
 
 > **Note:** The first start takes a few minutes to download the AI model (~1GB). This only happens once thanks to the persistent volume.
 
