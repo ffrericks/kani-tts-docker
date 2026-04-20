@@ -82,14 +82,17 @@ async def generate_speech(request: TTSRequest):
         if request.voice:
             prompt = f"{request.voice.strip()}: {prompt}"
 
-        # Generate speech
-        result = generator.generate(
+        # Generate speech — measure timing separately
+        t_start = time.time()
+        generator.generate(
             prompt,
             audio_writer,
             max_tokens=request.max_tokens
         )
+        t_generated = time.time()
 
         audio_writer.finalize()
+        t_finalized = time.time()
 
         if not audio_writer.audio_chunks:
             raise HTTPException(status_code=500, detail="No audio generated")
@@ -99,11 +102,19 @@ async def generate_speech(request: TTSRequest):
         wav_write(wav_buffer, 22050, full_audio)
         wav_buffer.seek(0)
 
+        speech_time = round(t_generated - t_start, 2)
+        codec_time = round(t_finalized - t_generated, 2)
+        total_time = round(t_finalized - t_start, 2)
+
         return Response(
             content=wav_buffer.read(),
             media_type="audio/wav",
             headers={
-                "Content-Disposition": "attachment; filename=speech.wav"
+                "Content-Disposition": "attachment; filename=speech.wav",
+                "X-Speech-Time": str(speech_time),
+                "X-Codec-Time": str(codec_time),
+                "X-Total-Time": str(total_time),
+                "Access-Control-Expose-Headers": "X-Speech-Time, X-Codec-Time, X-Total-Time",
             }
         )
     except Exception as e:

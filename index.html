@@ -105,6 +105,53 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
 
+        textarea.over-limit {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .char-counter {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.4rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .char-counter.warn { color: #f59e0b; }
+        .char-counter.over { color: #ef4444; }
+
+        .time-report {
+            margin-top: 1.25rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass);
+            border-radius: 0.75rem;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .time-report p {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .time-report .time-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.15rem 0;
+        }
+
+        .time-report .time-row span:last-child {
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+
         .controls {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -201,7 +248,8 @@
         <div class="studio-card">
             <div class="input-group">
                 <label for="text">What should I say?</label>
-                <textarea id="text" placeholder="Type your text here... Kani TTS will transform it into natural speech."></textarea>
+                <textarea id="text" placeholder="Type your text here... Kani TTS will transform it into natural speech." maxlength="800"></textarea>
+                <div class="char-counter" id="char-counter">0 / 800</div>
             </div>
 
             <div class="input-group">
@@ -257,6 +305,12 @@
                 <label>Result:</label>
                 <audio id="audio" controls></audio>
                 <div class="status" id="status">Ready to generate.</div>
+                <div class="time-report" id="time-report">
+                    <p>Time Report</p>
+                    <div class="time-row"><span>Speech Tokens</span><span id="t-speech">—</span></div>
+                    <div class="time-row"><span>Codec</span><span id="t-codec">—</span></div>
+                    <div class="time-row"><span>Total</span><span id="t-total">—</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -269,6 +323,25 @@
         const status = document.getElementById('status');
         const spinner = document.getElementById('spinner');
         const btnText = document.getElementById('btn-text');
+        const charCounter = document.getElementById('char-counter');
+        const timeReport = document.getElementById('time-report');
+
+        const CHAR_LIMIT = 800;
+        const CHAR_WARN = 600;
+
+        // Character counter
+        textInput.addEventListener('input', () => {
+            const len = textInput.value.length;
+            charCounter.textContent = `${len} / ${CHAR_LIMIT}`;
+            charCounter.classList.remove('warn', 'over');
+            textInput.classList.remove('over-limit');
+            if (len >= CHAR_LIMIT) {
+                charCounter.classList.add('over');
+                textInput.classList.add('over-limit');
+            } else if (len >= CHAR_WARN) {
+                charCounter.classList.add('warn');
+            }
+        });
 
         // Update range values
         document.getElementById('temperature').oninput = (e) => document.getElementById('temp-val').textContent = e.target.value;
@@ -283,7 +356,9 @@
             spinner.style.display = 'block';
             btnText.textContent = 'Generating...';
             status.textContent = 'Contacting server...';
+            status.style.color = '';
             playerContainer.style.display = 'block';
+            timeReport.style.display = 'none';
 
             try {
                 const response = await fetch('/tts', {
@@ -299,6 +374,11 @@
 
                 if (!response.ok) throw new Error('Generation failed');
 
+                // Read timing headers
+                const speechTime = response.headers.get('X-Speech-Time');
+                const codecTime  = response.headers.get('X-Codec-Time');
+                const totalTime  = response.headers.get('X-Total-Time');
+
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
                 audio.src = url;
@@ -306,6 +386,14 @@
 
                 status.textContent = 'Generation complete!';
                 status.style.color = '#22c55e';
+
+                // Show time report if data available
+                if (totalTime) {
+                    document.getElementById('t-speech').textContent = speechTime ? `${speechTime}s` : '—';
+                    document.getElementById('t-codec').textContent  = codecTime  ? `${codecTime}s`  : '—';
+                    document.getElementById('t-total').textContent  = `${totalTime}s`;
+                    timeReport.style.display = 'block';
+                }
             } catch (err) {
                 status.textContent = 'Error: ' + err.message;
                 status.style.color = '#ef4444';
