@@ -36,8 +36,8 @@ x-casaos:
     en_us: AI Text-to-Speech for your home server
   developer: nineninesix-ai
   author: ffrericks
-  icon: https://raw.githubusercontent.com/ffrericks/kani-tts-docker/main/public/logo.png
-  thumbnail: ""
+  icon: https://raw.githubusercontent.com/ffrericks/kani-tts-docker/main/public/kani-TTS-docker.png
+  thumbnail: https://raw.githubusercontent.com/ffrericks/kani-tts-docker/main/public/kani-TTS-docker.png
   title:
     en_us: Kani TTS
   category: AI
