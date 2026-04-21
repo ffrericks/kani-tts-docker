@@ -84,7 +84,7 @@ x-casaos:
       Kani TTS is een snelle, modulaire tekst-naar-spraak engine op basis van het kani-tts-370m model.
 
       Genereer hoogwaardige spraak direct in je browser. Ondersteunt 15 stemmen in 6 talen.
-  icon: https://raw.githubusercontent.com/ffrericks/kani-tts-docker/main/public/kani-TTS-docker.png
+  icon: https://raw.githubusercontent.com/ffrericks/kani-tts-docker/main/public/logo.png
   thumbnail: https://raw.githubusercontent.com/ffrericks/kani-tts-docker/main/public/kani-TTS-docker.png
   screenshot_link:
     - https://raw.githubusercontent.com/ffrericks/kani-tts-docker/main/public/screenshot-1.jpg
