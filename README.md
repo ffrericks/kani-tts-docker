@@ -2,7 +2,7 @@
   <img src="public/kani-TTS-docker.png" alt="Kani-TTS Logo" width="200"/>
 </p>
 
-# Kani-TTS Docker for CasaOS
+# Kani-TTS Docker for CasaOS - NVIDIA GPU
 
 A dockerized version of [Kani-TTS](https://github.com/nineninesix-ai/kani-tts), ready to run on **CasaOS** and Proxmox environments with NVIDIA GPU passthrough.
 
